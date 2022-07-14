@@ -172,7 +172,7 @@ nnSVG <- function(input, spatial_coords = NULL, X = NULL,
   if (!is.null(X)) {
     stopifnot(nrow(X) == ncol(input))
   }
-  
+  library("BiocParallel")
   if (is.null(BPPARAM)) {
     BPPARAM <- MulticoreParam(workers = n_threads)
   }
@@ -183,7 +183,7 @@ nnSVG <- function(input, spatial_coords = NULL, X = NULL,
   
   if (is(input, "SpatialExperiment")) {
     y <- assays(spe)[[assay_name]]
-    coords <- spatialCoords(spe)
+    coords <- data.frame(row=spe@colData$array_row, col=spe@colData$array_col)
   } else {
     y <- input
     coords <- spatial_coords
@@ -195,6 +195,7 @@ nnSVG <- function(input, spatial_coords = NULL, X = NULL,
   coords <- apply(coords, 2, function(col) (col - min(col)) / range_all)
   
   # calculate ordering of coordinates
+  library("BRISC")
   order_brisc <- BRISC_order(coords, order = order, verbose = verbose)
   
   # calculate nearest neighbors
@@ -322,4 +323,3 @@ nnSVG <- function(input, spatial_coords = NULL, X = NULL,
     mat_brisc
   }
 }
-
